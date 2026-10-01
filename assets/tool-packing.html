@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>装箱模拟器 · 航运派 Trans Pi</title>
+  <link rel="stylesheet" href="tool.css?v=transpi-tools-20261001" />
+</head>
+<body>
+  <div class="tool-page">
+    <a class="tool-back" href="index.html">← 返回 航运派 Trans Pi</a>
+    <h1 class="tool-h1">装箱模拟器</h1>
+    <p class="tool-sub">输入单件货尺寸、重量与总件数，按标准箱规估算可装数量与体积利用率，避免装箱亏吨或超重甩货。</p>
+
+    <div class="tool-panel">
+      <h2>货物与箱型</h2>
+      <div class="tool-grid">
+        <div class="field"><label>货长 (cm)</label><input id="cl" type="number" value="120" min="1" /></div>
+        <div class="field"><label>货宽 (cm)</label><input id="cw" type="number" value="100" min="1" /></div>
+        <div class="field"><label>货高 (cm)</label><input id="ch" type="number" value="90" min="1" /></div>
+        <div class="field"><label>单件重量 (kg)</label><input id="cwgt" type="number" value="200" min="0" /></div>
+        <div class="field"><label>总件数</label><input id="cnt" type="number" value="100" min="1" /></div>
+        <div class="field"><label>箱型 Container</label>
+          <select id="box">
+            <option value="20GP">20GP (33 CBM / 28t)</option>
+            <option value="40GP">40GP (67.7 CBM / 26.5t)</option>
+            <option value="40HC" selected>40HC (76 CBM / 26.5t)</option>
+          </select>
+        </div>
+      </div>
+      <button class="tool-btn" onclick="calcPack()">模拟装箱</button>
+    </div>
+
+    <div class="tool-result" id="result">填写上方信息后点击「模拟装箱」。</div>
+    <p class="tool-note">箱规（内尺寸 L×W×H，约）：20GP 5.90×2.35×2.39m；40GP 12.03×2.35×2.39m；40HC 12.03×2.35×2.69m。估算为单一方向整齐码放的理论值，未考虑托盘间隙、不规则形状与装箱工艺，实际以现场操作为准。</p>
+  </div>
+
+  <script>
+    var BOX = {
+      '20GP': { l: 5.90, w: 2.35, h: 2.39, vol: 33, maxw: 28000 },
+      '40GP': { l: 12.03, w: 2.35, h: 2.39, vol: 67.7, maxw: 26500 },
+      '40HC': { l: 12.03, w: 2.35, h: 2.69, vol: 76, maxw: 26500 }
+    };
+    function calcPack() {
+      function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
+      var box = BOX[document.getElementById('box').value];
+      var L = v('cl') / 100, W = v('cw') / 100, H = v('ch') / 100;
+      var wgt = v('cwgt'), total = Math.max(1, parseInt(v('cnt')) || 1);
+      var perVol = L * W * H;
+      var nx = Math.floor(box.l / L), ny = Math.floor(box.w / W), nz = Math.floor(box.h / H);
+      var byVol = nx * ny * nz;
+      var byWgt = wgt > 0 ? Math.floor(box.maxw / wgt) : byVol;
+      var fit = Math.min(byVol, byWgt, total);
+      var usedVol = fit * perVol;
+      var util = (usedVol / box.vol * 100).toFixed(1);
+      var overW = (fit * wgt) > box.maxw;
+      var L2 =
+        '============================================\n' +
+        '           装 箱 模 拟 结 果\n' +
+        '============================================\n' +
+        '选用箱型            : ' + document.getElementById('box').value + '\n' +
+        '箱内可放(长×宽×高)  : ' + nx + ' × ' + ny + ' × ' + nz + ' = ' + byVol + ' 件\n' +
+        '重量上限可放        : ' + (wgt > 0 ? byWgt + ' 件' : '不限(单重为0)') + '\n' +
+        '待装总件数          : ' + total + ' 件\n' +
+        '--------------------------------------------\n' +
+        '建议装载件数        : ' + fit + ' 件\n' +
+        '占用体积            : ' + usedVol.toFixed(2) + ' / ' + box.vol + ' CBM\n' +
+        '体积利用率          : ' + util + '%\n' +
+        '装载总重            : ' + Math.round(fit * wgt) + ' / ' + box.maxw + ' kg\n' +
+        '--------------------------------------------\n' +
+        (overW ? '⚠ 注意：已达重量上限，剩余件数请分箱。\n' : '✓ 重量在限重内。\n') +
+        (fit < total ? '⚠ 本箱装不下全部 ' + total + ' 件，需 ' + Math.ceil(total / Math.max(1, fit)) + ' 个箱子。\n' : '✓ 一箱可装完全部货物。\n') +
+        '============================================';
+      document.getElementById('result').textContent = L2;
+    }
+  </script>
+</body>
+</html>
