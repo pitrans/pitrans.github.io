@@ -101,6 +101,8 @@ body {
   position: relative;
   height: 700px;
   overflow: hidden;
+  /* 兜底：视频未加载/404 时仍显示海浪图，避免 Hero 空白 */
+  background: url("assets/hero-ocean-poster.jpg") center center / cover no-repeat #07111e;
 }
 .hero-video {
   position: absolute;
@@ -471,6 +473,76 @@ body {
 .ai-card:hover {
   transform: scale(1.06) translateY(-10px);
   box-shadow: 0 18px 44px rgba(212,175,55,0.30);
+  z-index: 2;
+}
+
+/* ===== 实用工具 ===== */
+.tools {
+  padding: 80px 0 60px;
+  background:
+    linear-gradient(var(--overlay), var(--overlay)),
+    url('assets/tools-bg.jpg') center/cover no-repeat;
+}
+.tools-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 36px;
+  text-align: center;
+}
+.tools-desc {
+  font-family: var(--font-cn);
+  font-size: 16px;
+  color: var(--text-gray);
+  max-width: 680px;
+}
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+.tool-card {
+  width: auto;
+  padding: 28px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: 12px;
+  background: var(--card-bg);
+  border: 1px solid var(--gold);
+  transition: transform .38s cubic-bezier(.22,.61,.36,1),
+              box-shadow .38s ease;
+  will-change: transform;
+}
+.tool-card .tool-icon {
+  width: 44px;
+  height: 44px;
+}
+.tool-title {
+  font-family: var(--font-cn);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.tool-desc {
+  font-family: var(--font-cn);
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text-gray);
+}
+/* 悬停：当前卡片上浮放大，其余缩小变淡 */
+.tools-grid:has(.tool-card:hover) .tool-card:not(:hover) {
+  transform: scale(0.96);
+  opacity: 0.8;
+}
+.tool-card:hover {
+  transform: scale(1.04) translateY(-8px);
+  box-shadow: 0 18px 44px rgba(212,175,55,0.28);
   z-index: 2;
 }
 
